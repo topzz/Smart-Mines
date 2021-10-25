@@ -86,14 +86,14 @@ void loop()
   while(Serial2.available()>0)
   {
     macRec=Serial2.readStringUntil('\n');
-    //Serial.println(macRec);
   }  
   while(SerialBT.available()>0) {
     RxdChar = (char)SerialBT.read();
     BT_String+=RxdChar;
   }
   if(macRec.length()<20&&macRec!=""){
-    SerialBT.print(macRec);      
+    SerialBT.print(macRec); 
+    Serial.println(macRec);     
   }
   
   if(BT_String.length()>20)
@@ -103,7 +103,7 @@ void loop()
     digitalWrite(LEDPin, HIGH);
     Serial2.print(ESP1);
     Serial.println(ESP1);
-    //saveToSD();
+    saveToSD();
   }
   
  

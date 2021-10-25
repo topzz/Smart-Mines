@@ -9,6 +9,12 @@
 String dataRec;
 String success;
 
+String mac;
+#define broadcast_Button  27
+int buttonState;
+int lastButtonState = LOW;
+const int broadcastLED= 13;
+
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 // Structure example to receive data
@@ -52,6 +58,8 @@ void setup() {
   //Initialize Serial Monitor
   Serial.begin(115200);
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  pinMode(broadcast_Button,INPUT);
+  pinMode(13,OUTPUT);
   //Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
 
@@ -82,7 +90,8 @@ void setup() {
 }
  
 void loop() 
-{
+{ 
+  button();
   while(Serial2.available()>0)
   {
     dataRec=(Serial2.readStringUntil('\n'));
@@ -104,6 +113,35 @@ void loop()
   delay(10);
 }
 
+void button()
+{
+  buttonState=digitalRead(broadcast_Button);
+
+  if(buttonState==HIGH)
+  {
+    mac= "BC:DD:C2:CC:AE:20&asdfghjklzxcvbnmqwertyuiop12345678900987654321poiuytrewqlkjhgfdsamnbvcxz";
+    mac.toCharArray(myData.dt, 250);  
+    Serial.println(myData.dt);
+  
+  // Send message via ESP-NOW
+    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
+   
+   if (result == ESP_OK) {
+      Serial.println("Sent with success");
+      digitalWrite(broadcastLED,HIGH);
+      delay(1000);
+      digitalWrite(broadcastLED, LOW);
+    }
+   else {
+      Serial.println("Error sending the data");
+    }
+      delay(2000);
+   }
+   else
+   {
+    //do nothing
+   }
+}
 
 String getValue(String data, char separator, int index)
 {

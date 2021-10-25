@@ -55,7 +55,7 @@ void Bt_Status (esp_spp_cb_event_t event, esp_spp_cb_param_t *param) {
 TaskHandle_t Task1;
 TaskHandle_t Task2;
 String filename = "/File_httpData";
-String checker="/Checker/File";
+String checker="/Checker";
 String macAdr;  
 String App_Data, character;
 String BT_String;
@@ -166,7 +166,7 @@ void setup() {
     modem.simUnlock(simPIN);
   }
   
-  reset_SD_Card();
+  //reset_SD_Card();
   
    
   SerialMon.println("Modem Initialized...");
@@ -237,6 +237,8 @@ void Task1code( void * pvParameters ){
       while(!save){
         String checkerFN= checker+".txt";
         save=writeFile(SD,checkerFN, App_Data);
+        Serial.println(checkerFN);
+        Serial.println(App_Data);
       }
       
     }
@@ -373,7 +375,24 @@ void Task2code( void * pvParameters ){
        digitalWrite(LEDPin, LOW);
     }
 //THis is for the data from Checker
-
+    String checkerFN= checker+".txt";
+    String checker_data=readFile(SD,checkerFN);
+    if(checker_data!="")
+    {
+      digitalWrite(LEDPin, HIGH);
+      String checker_data = readFile(SD, checkerFN);
+      String httpRequestData = "api_key=" + apiKeyValue +"&"+ checker_data +"";
+      Serial.println(httpRequestData);
+      
+      bool Send_success=SendtoServer(httpRequestData);
+      if(Send_success)
+      {
+        digitalWrite(13,HIGH);
+        deleteFile(SD,checkerFN);
+        delay(1000);
+        digitalWrite(13,LOW);
+      }
+    }
 
   
     vTaskDelay(100/portTICK_PERIOD_MS);
