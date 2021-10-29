@@ -41,6 +41,7 @@ void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
   Serial.println(myData.dt);
 
   macRec= getValue(myData.dt,'&',0);
+  Destination=getValue(myData.dt,'&',1);
   Serial.print(macRec);
   Serial.println(macRec.length());
   Serial.print(mac);
@@ -48,6 +49,14 @@ void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
   if(macRec == mac)
   {
     Serial2.print(myData.dt);
+    digitalWrite(26,HIGH);
+    delay(500);
+    digitalWrite(26,LOW);
+  }
+  if(Destination=="Destination")
+  {
+    Serial2.print(myData.dt);
+    Serial.println(myData.dt);
     digitalWrite(26,HIGH);
     delay(500);
     digitalWrite(26,LOW);
@@ -111,9 +120,7 @@ void loop()
 
 void broadcastMAC()
 {
-  
   buttonState=digitalRead(broadcast_Button);
-
   if(buttonState==1)
   {
        // Set values to send
@@ -132,7 +139,7 @@ void broadcastMAC()
    else {
       Serial.println("Error sending the data");
     }
-      delay(2000);
+      delay(2000);00000000000000000000000
    }
    else
    {
@@ -143,10 +150,10 @@ void broadcastMAC()
 String getValue(String data, char separator, int index)
 {
     int found = 0;
-    int strIndex[] = { 0, -1 };
+    int strIndex[] = { 0, 0 };
     int maxIndex = data.length() - 1;
 
-    for (int i = 0; i <= maxIndex && found <= index; i++) {
+    for (int i = 1; i <= maxIndex && found <= index; i++) {
         if (data.charAt(i) == separator || i == maxIndex) {
             found++;
             strIndex[0] = strIndex[1] + 1;

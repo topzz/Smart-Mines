@@ -56,7 +56,9 @@ TaskHandle_t Task1;
 TaskHandle_t Task2;
 String filename = "/File_httpData";
 String checker="/Checker";
-String macAdr;  
+String receiver="/Destination";
+String macAdr;
+String destination;  
 String App_Data, character;
 String BT_String;
 String LastNum = "/File_LastNum.txt";
@@ -166,7 +168,7 @@ void setup() {
     modem.simUnlock(simPIN);
   }
   
-  //reset_SD_Card();
+  //reset_SD_Card();   
   
    
   SerialMon.println("Modem Initialized...");
@@ -209,14 +211,14 @@ void setup() {
 
 
 
-void loop() {
+void loop() 
+{
  
 }
 
 //Task1code: Waits for App Data and Saves to SD
 void Task1code( void * pvParameters ){
   for(;;){
-    
     
     while(SerialBT.available()>0) {
       character = (char)SerialBT.read();
@@ -230,22 +232,23 @@ void Task1code( void * pvParameters ){
     
     if(App_Data!=""){
       Serial.println(App_Data);
-      macAdr = getValue(App_Data,'&', 0);
-      Serial.println(macAdr);
+      SerialBT.print(App_Data);
+      macAdr= getValue(App_Data,'&',0);
+      destination= getValue(App_Data,'&',8);
       bool save=false;
-      
       while(!save){
         String checkerFN= checker+".txt";
         save=writeFile(SD,checkerFN, App_Data);
-        Serial.println(checkerFN);
-        Serial.println(App_Data);
-      }
-      
+        Serial.println(checkerFN+" : "+App_Data);
+        String receiverFN= receiver+".txt";
+        save=writeFile(SD,receiverFN,destination);
+        Serial.println(receiverFN+" : "+destination);
+       }  
     }
     if(BT_String.length()>15){
       //Read fuel
       String Fuel_level = read_fuel();
-      String http_data = macAdr + "&" + BT_String + "&fuel="+ Fuel_level ;
+      String http_data = BT_String + "&fuel="+ Fuel_level ;
       Serial.println(http_data);
       //delay(1);
       String lastnum = readFile(SD, LastNum);
@@ -388,13 +391,11 @@ void Task2code( void * pvParameters ){
       if(Send_success)
       {
         digitalWrite(13,HIGH);
-        deleteFile(SD,checkerFN);
+        //deleteFile(SD,checkerFN);
         delay(1000);
         digitalWrite(13,LOW);
       }
     }
-
-  
     vTaskDelay(100/portTICK_PERIOD_MS);
   }
   vTaskDelay(10/portTICK_PERIOD_MS);

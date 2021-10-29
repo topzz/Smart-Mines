@@ -45,7 +45,7 @@ void Bt_Status (esp_spp_cb_event_t event, esp_spp_cb_param_t *param) {
 void setup()
 {
   Serial.begin(115200);
-  
+ /* 
   if(!SD.begin(5)){
     Serial.println("Card Mount Failed");
     return;
@@ -57,15 +57,15 @@ void setup()
     return;
   }
  // reset_SD_Card();
-  
+*/  
   Serial2.begin(9600,SERIAL_8N1, RXD2, TXD2);
   pinMode(LEDPin, OUTPUT);
   pinMode(BT_LED, OUTPUT);
   digitalWrite (BT_LED, LOW);
 
-  SerialBT.begin("SM_Checker 2"); //Bluetooth device name
+  SerialBT.begin("SM_Checker 3"); //Bluetooth device name
   SerialBT.register_callback (Bt_Status);
-
+/*
   if(!SD.exists(LastSent)&&!SD.exists(LastNum)){
     writeFile(SD, LastSent, "0");
     writeFile(SD, LastNum, "0");
@@ -77,7 +77,7 @@ void setup()
     Serial.println("LastNum:" + lastnum);
     Serial.println("LastSent:" + lastsent);
   }
- 
+ */
 }
 
 
@@ -91,27 +91,29 @@ void loop()
     RxdChar = (char)SerialBT.read();
     BT_String+=RxdChar;
   }
-  if(macRec.length()<20&&macRec!=""){
+  if(macRec.length()<18&&macRec!=""){
     SerialBT.print(macRec); 
     Serial.println(macRec);     
   }
   
-  if(BT_String.length()>20)
+  if(BT_String.length()>18)
   {
     Serial.println(macRec);
-    ESP1= macRec + "&" + BT_String;
+    ESP1=BT_String;
     digitalWrite(LEDPin, HIGH);
     Serial2.print(ESP1);
     Serial.println(ESP1);
-    saveToSD();
+    //saveToSD();
+    digitalWrite(LEDPin,LOW);
   }
   
  
   BT_String="";
   ESP1="";
+  macRec="";
   vTaskDelay(20/portTICK_PERIOD_MS);
 }
-
+/*
 void saveToSD()
 {
   String lastnum = readFile(SD, LastNum);
@@ -131,7 +133,7 @@ void saveToSD()
     written2=writeFile(SD, LastNum, (String)lastnum_int);
     Serial.println("W2");
   }
-  Serial.println("savesd");
+  Serial.println("save to sd");
 }
 
 void deleteFile(fs::FS &fs, String path){
@@ -190,23 +192,7 @@ bool writeFile(fs::FS &fs, String path, String message){
     }
 }
 void reset_SD_Card(){
-  /*
-  String lastsent=readFile(SD, LastSent);
-  String lastnum=readFile(SD, LastNum);
-  int lastsent_int = lastsent.toInt();
-  int lastnum_int = lastnum.toInt();
-  if((lastsent_int>lastnum_int)){
-          lastnum="0";
-          lastsent="0";
-          bool written1=false;
-          bool written2=false;
-          while(!written1) {         
-            written1 = writeFile(SD, LastSent, lastsent);
-          }
-          while(!written2) {
-            written2 = writeFile(SD, LastNum, lastnum);
-          }
-  }*/
+  
   for(int i=0; i<10; i++)
     { 
       String http_txt= filename+String(i)+".txt";
@@ -227,10 +213,10 @@ void reset_SD_Card(){
 String getValue(String data, char separator, int index)
 {
     int found = 0;
-    int strIndex[] = { 0, -1 };
+    int strIndex[] = { 0, 0 };
     int maxIndex = data.length() - 1;
 
-    for (int i = 0; i <= maxIndex && found <= index; i++) {
+    for (int i = 1; i <= maxIndex && found <= index; i++) {
         if (data.charAt(i) == separator || i == maxIndex) {
             found++;
             strIndex[0] = strIndex[1] + 1;
@@ -239,3 +225,4 @@ String getValue(String data, char separator, int index)
     }
     return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
+*/

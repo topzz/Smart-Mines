@@ -9,7 +9,7 @@
 String dataRec;
 String success;
 
-String mac;
+String mac, mac2;
 #define broadcast_Button  27
 int buttonState;
 int lastButtonState = LOW;
@@ -39,8 +39,11 @@ void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
            mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
   //Serial.println(macStr);
   memcpy(&myData, incomingData, sizeof(myData));
+  digitalWrite(broadcastLED,HIGH);
   Serial.println(myData.dt);
   Serial2.print(myData.dt);
+  delay(500);
+  digitalWrite(broadcastLED,LOW);
 }
 // Callback when data is sent
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
@@ -59,7 +62,7 @@ void setup() {
   Serial.begin(115200);
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   pinMode(broadcast_Button,INPUT);
-  pinMode(13,OUTPUT);
+  pinMode(broadcastLED,OUTPUT);
   //Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
 
@@ -91,7 +94,7 @@ void setup() {
  
 void loop() 
 { 
-  button();
+  //button();
   while(Serial2.available()>0)
   {
     dataRec=(Serial2.readStringUntil('\n'));
@@ -119,10 +122,10 @@ void button()
 
   if(buttonState==HIGH)
   {
-    mac= "BC:DD:C2:CC:AE:20&asdfghjklzxcvbnmqwertyuiop12345678900987654321poiuytrewqlkjhgfdsamnbvcxz";
-    mac.toCharArray(myData.dt, 250);  
+    mac= "24:6F:28:44:7B:E0&checker/data?date=2021-24-27&time=12:24:18&shifts=2ND&activities=BENEFICIATING&rock_type=LIM&ore_class=LFE&source=MA-2&destination=STY-3&pits=PIT2&bench=B2&mine_blocks=S132&beneficiation=NO&bargeloading=NO&loading=TX-30&receiving=T-123&12345678900987654321";
+    mac.toCharArray(myData.dt, 250); 
     Serial.println(myData.dt);
-  
+    Serial.println(mac.length());
   // Send message via ESP-NOW
     esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
    
@@ -135,21 +138,17 @@ void button()
    else {
       Serial.println("Error sending the data");
     }
-      delay(2000);
-   }
-   else
-   {
-    //do nothing
-   }
+      delay(1000);
+  }
 }
 
 String getValue(String data, char separator, int index)
 {
     int found = 0;
-    int strIndex[] = { 0, -1 };
+    int strIndex[] = { 0, 0 };
     int maxIndex = data.length() - 1;
 
-    for (int i = 0; i <= maxIndex && found <= index; i++) {
+    for (int i = 1; i <= maxIndex && found <= index; i++) {
         if (data.charAt(i) == separator || i == maxIndex) {
             found++;
             strIndex[0] = strIndex[1] + 1;
