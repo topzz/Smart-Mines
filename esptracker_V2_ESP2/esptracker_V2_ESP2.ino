@@ -41,7 +41,6 @@ void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
   Serial.println(myData.dt);
 
   macRec= getValue(myData.dt,'&',0);
-  Destination=getValue(myData.dt,'&',1);
   Serial.print(macRec);
   Serial.println(macRec.length());
   Serial.print(mac);
@@ -53,7 +52,7 @@ void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
     delay(500);
     digitalWrite(26,LOW);
   }
-  if(Destination=="Destination")
+  if(macRec=="destination")
   {
     Serial2.print(myData.dt);
     Serial.println(myData.dt);
@@ -139,7 +138,7 @@ void broadcastMAC()
    else {
       Serial.println("Error sending the data");
     }
-      delay(2000);00000000000000000000000
+      delay(2000);
    }
    else
    {
@@ -150,10 +149,10 @@ void broadcastMAC()
 String getValue(String data, char separator, int index)
 {
     int found = 0;
-    int strIndex[] = { 0, 0 };
+    int strIndex[] = { 0, -1 };
     int maxIndex = data.length() - 1;
 
-    for (int i = 1; i <= maxIndex && found <= index; i++) {
+    for (int i = 0; i <= maxIndex && found <= index; i++) {
         if (data.charAt(i) == separator || i == maxIndex) {
             found++;
             strIndex[0] = strIndex[1] + 1;

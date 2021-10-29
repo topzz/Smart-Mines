@@ -12,8 +12,6 @@ String mac, macRec;
 int buttonState;
 int lastButtonState = LOW;
 const int broadcastLED= 13;
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
@@ -26,22 +24,19 @@ typedef struct struct_message {
 // Create a struct_message called myData
 struct_message myData;
 
-
-
-// Create an array with all the structures
-//struct_message boardsStruct[3] = {board1, board2, board3};
-
 // callback function that will be executed when data is received
-void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) {
+void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
+{
   char macStr[18];
   snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
            mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
   //Serial.println(macStr);
   memcpy(&myData, incomingData, sizeof(myData));
   Serial.println(myData.dt);
- }
+}
 // Callback when data is sent
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) 
+{
   Serial.print("\rLast Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
   if (status ==0){
@@ -58,6 +53,7 @@ void setup() {
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   pinMode(broadcast_Button, INPUT);
   pinMode(broadcastLED, OUTPUT);
+  digitalWrite(broadcastLED,HIGH);
   pinMode(26,OUTPUT);
   //Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
@@ -69,7 +65,7 @@ void setup() {
     return;
   }
    // Once ESPNow is successfully Init, we will register for Send CB to
-  // get the status of Trasnmitted packet
+  // get the status of Transmitted packet
   esp_now_register_send_cb(OnDataSent);
   
   // Register peer
@@ -91,9 +87,7 @@ void setup() {
  
 void loop() 
 {
-  
   broadcastMAC();
-  
 }
 
 void broadcastMAC()
@@ -102,7 +96,7 @@ void broadcastMAC()
   if(buttonState==1)
   {
        // Set values to send
-    receiver= mac+"&destination";
+    receiver= "destination&" + mac;
     receiver.toCharArray(myData.dt, 250);  
     Serial.println(myData.dt);
   
@@ -118,11 +112,7 @@ void broadcastMAC()
    else {
       Serial.println("Error sending the data");
     }
-      delay(2000);
-   }
-   else
-   {
-    //do nothing
+      delay(1000);
    }
 }
 

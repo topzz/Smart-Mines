@@ -63,6 +63,7 @@ void setup() {
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   pinMode(broadcast_Button,INPUT);
   pinMode(broadcastLED,OUTPUT);
+  digitalWrite(broadcastLED,HIGH);
   //Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
 
@@ -94,7 +95,7 @@ void setup() {
  
 void loop() 
 { 
-  //button();
+ 
   while(Serial2.available()>0)
   {
     dataRec=(Serial2.readStringUntil('\n'));
@@ -114,46 +115,4 @@ void loop()
   }
   dataRec="";
   delay(10);
-}
-
-void button()
-{
-  buttonState=digitalRead(broadcast_Button);
-
-  if(buttonState==HIGH)
-  {
-    mac= "24:6F:28:44:7B:E0&checker/data?date=2021-24-27&time=12:24:18&shifts=2ND&activities=BENEFICIATING&rock_type=LIM&ore_class=LFE&source=MA-2&destination=STY-3&pits=PIT2&bench=B2&mine_blocks=S132&beneficiation=NO&bargeloading=NO&loading=TX-30&receiving=T-123&12345678900987654321";
-    mac.toCharArray(myData.dt, 250); 
-    Serial.println(myData.dt);
-    Serial.println(mac.length());
-  // Send message via ESP-NOW
-    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
-   
-   if (result == ESP_OK) {
-      Serial.println("Sent with success");
-      digitalWrite(broadcastLED,HIGH);
-      delay(1000);
-      digitalWrite(broadcastLED, LOW);
-    }
-   else {
-      Serial.println("Error sending the data");
-    }
-      delay(1000);
-  }
-}
-
-String getValue(String data, char separator, int index)
-{
-    int found = 0;
-    int strIndex[] = { 0, 0 };
-    int maxIndex = data.length() - 1;
-
-    for (int i = 1; i <= maxIndex && found <= index; i++) {
-        if (data.charAt(i) == separator || i == maxIndex) {
-            found++;
-            strIndex[0] = strIndex[1] + 1;
-            strIndex[1] = (i == maxIndex) ? i+1 : i;
-        }
-    }
-    return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }

@@ -62,7 +62,7 @@ void setup()
   pinMode(LEDPin, OUTPUT);
   pinMode(BT_LED, OUTPUT);
   digitalWrite (BT_LED, LOW);
-
+  digitalWrite(LEDPin,HIGH);
   SerialBT.begin("SM_Checker 3"); //Bluetooth device name
   SerialBT.register_callback (Bt_Status);
 /*
@@ -100,11 +100,11 @@ void loop()
   {
     Serial.println(macRec);
     ESP1=BT_String;
-    digitalWrite(LEDPin, HIGH);
+    digitalWrite(LEDPin, LOW);
     Serial2.print(ESP1);
     Serial.println(ESP1);
     //saveToSD();
-    digitalWrite(LEDPin,LOW);
+    digitalWrite(LEDPin,HIGH);
   }
   
  
@@ -154,9 +154,9 @@ String readFile(fs::FS &fs, String path){
     if(!file){
         Serial.println();
         Serial.println("Failed to open "+ path +" for reading");
-        digitalWrite(LEDPin, HIGH);
-        vTaskDelay(50/portTICK_PERIOD_MS);
         digitalWrite(LEDPin, LOW);
+        vTaskDelay(50/portTICK_PERIOD_MS);
+        digitalWrite(LEDPin, HIGH);
         return read_String;
     }
 
