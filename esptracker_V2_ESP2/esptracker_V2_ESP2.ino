@@ -52,7 +52,7 @@ void OnDataRecv(const uint8_t * mac_addr, const uint8_t *incomingData, int len) 
     delay(500);
     digitalWrite(26,LOW);
   }
-  if(macRec=="destination")
+  if(macRec=="RCV")
   {
     Serial2.print(myData.dt);
     Serial.println(myData.dt);

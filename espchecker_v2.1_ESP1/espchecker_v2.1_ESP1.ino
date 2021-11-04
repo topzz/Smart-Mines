@@ -24,6 +24,25 @@ String LastSent = "/File_LastSent.txt";
 String macRec, ESP1;
 String BT_String, RxdChar;
 
+#include <Wire.h>
+#define I2C_SDA              21
+#define I2C_SCL              22
+#define IP5306_ADDR          0x75
+#define IP5306_REG_SYS_CTL0  0x00
+// I2C for SIM800 (to keep it running when powered from battery)
+TwoWire I2CPower = TwoWire(0);
+
+bool setPowerBoostKeepOn(int en){
+  I2CPower.beginTransmission(IP5306_ADDR);
+  I2CPower.write(IP5306_REG_SYS_CTL0);
+  if (en) {
+    I2CPower.write(0x37); // Set bit1: 1 enable 0 disable boost keep on
+  } else {
+    I2CPower.write(0x35); // 0x37 is default reg value
+  }
+  return I2CPower.endTransmission() == 0;
+}
+
 BluetoothSerial SerialBT;
 // Bt_Status callback function
 void Bt_Status (esp_spp_cb_event_t event, esp_spp_cb_param_t *param) {
@@ -45,6 +64,10 @@ void Bt_Status (esp_spp_cb_event_t event, esp_spp_cb_param_t *param) {
 void setup()
 {
   Serial.begin(115200);
+  I2CPower.begin(I2C_SDA, I2C_SCL, 400000);
+  //I2CBME.begin(I2C_SDA_2, I2C_SCL_2, 400000);
+  bool isOk = setPowerBoostKeepOn(1);
+  Serial.println(String("IP5306 KeepOn ") + (isOk ? "OK" : "FAIL"));
  /* 
   if(!SD.begin(5)){
     Serial.println("Card Mount Failed");
@@ -63,7 +86,7 @@ void setup()
   pinMode(BT_LED, OUTPUT);
   digitalWrite (BT_LED, LOW);
   digitalWrite(LEDPin,HIGH);
-  SerialBT.begin("SM_Checker 3"); //Bluetooth device name
+  SerialBT.begin("SM_Checker 101"); //Bluetooth device name
   SerialBT.register_callback (Bt_Status);
 /*
   if(!SD.exists(LastSent)&&!SD.exists(LastNum)){
@@ -91,12 +114,12 @@ void loop()
     RxdChar = (char)SerialBT.read();
     BT_String+=RxdChar;
   }
-  if(macRec.length()<18&&macRec!=""){
+  if(macRec.length()<20&&macRec!=""){
     SerialBT.print(macRec); 
     Serial.println(macRec);     
   }
   
-  if(BT_String.length()>18)
+  if(BT_String.length()>20)
   {
     Serial.println(macRec);
     ESP1=BT_String;
